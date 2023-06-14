@@ -28,25 +28,30 @@ class AdidasSpider(CrawlSpider):
         # Getting id spliting the url until we get IG4986
         item_url = response.request.url
         item_id = item_url.split('/')[-1].split('.')[0]
+
         original_price = response.xpath('//div[@class="product-price___2Mip5 gl-vspace"]/div[1]/div[1]/div[1]/div[1]/text()').get()
-        unique_color = response.xpath('//div[@data-auto-id="color-label"]/text()').get()
+
         # In case there are more than one color we get 'Color del articulo: [color]' so I decided to format it and just show the color
         color_list = response.xpath('//div[@class="color-chooser-grid___1ZBx_"]/a/img/@alt').getall()
         colors_list_formated = [color.replace('Color del artículo: ', '')for color in color_list]
+        # Else
+        unique_color = response.xpath('//div[@data-auto-id="color-label"]/text()').get()
+
+        #Pictures sometime has duplicated and data that's not and url
+        pictures = list(dict.fromkeys(response.xpath('//source[@srcset="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="]/img/@src').getall()))
+        images_url = [pic for pic in pictures if pic.startswith('https://')]
 
         item['id'] = item_id
         item['title'] = response.xpath('//div[@class="product-description___1TLpA"]/h1[@data-auto-id="product-title"]/span/text()').get()
-        print(item['title'])
         item['brand'] = response.xpath('//div[@data-auto-id="product-category"]/span/text()').get()
         item['description'] = response.xpath('//meta[@id="meta-og-description"]/@content').get()
         item['original_price'] = original_price
 
-        # TODO: Investigate why are we getting emplty lists on availability, images_urls and sizes
-        item['availability'] = response.xpath('//div[@data-auto-id="size-selector"]/button[@class="gl-label size___2lbev"]/span/text()').getall()
+        # TODO: Investigate why are we getting AAA lists on availability and sizes
+        item['availability'] = response.xpath('//div[@data-auto-id="size-selector"]').getall()
         print(item['availability'])
-        item['images_urls'] = response.xpath('//div[@class="transitional-content___3NXVp"]/picture[@data-testid="pdp-gallery-picture"]/img/@src').getall()
-        print(item['images_urls'])
-        item['sizes'] = response.xpath('//div[@data-auto-id="size-selector"]/button/span/text()').getall()
+        item['images_urls'] = images_url
+        item['sizes'] = response.xpath('//div[@class="sizes___2jQjF gl-vspace"]').extract()
         print(item['sizes'])
         item['category_path'] = " > ".join(response.xpath('//div[1]/div[2]/ol/li[@typeof="ListItem"]/a/span/text()').getall())
         # We need to check if there's a descount
