@@ -1,4 +1,6 @@
 import scrapy
+import json
+
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from CrawlingChallenge.items import ProductItem
@@ -46,21 +48,33 @@ class AdidasSpider(CrawlSpider):
         item['brand'] = response.xpath('//div[@data-auto-id="product-category"]/span/text()').get()
         item['description'] = response.xpath('//meta[@id="meta-og-description"]/@content').get()
         item['original_price'] = original_price
-
-        # TODO: Investigate why are we getting AAA lists on availability and sizes
-        item['availability'] = response.xpath('//div[@data-auto-id="size-selector"]').getall()
-        print(item['availability'])
         item['images_urls'] = images_url
-        item['sizes'] = response.xpath('//div[@class="sizes___2jQjF gl-vspace"]').extract()
-        print(item['sizes'])
         item['category_path'] = " > ".join(response.xpath('//div[1]/div[2]/ol/li[@typeof="ListItem"]/a/span/text()').getall())
-        # We need to check if there's a descount
-        # TODO: test it with a discounted product
         item['current_price'] = response.xpath('//div[@class="product-price___2Mip5 gl-vspace"]/div[1]/div[1]/div[1]/div[2]/text()').get() or original_price
+        print(item['current_price'])
         item['colors'] = colors_list_formated or unique_color
+
+        sizes_url = 'https://www.adidas.es/api/products/' + item['id']
+
+        yield scrapy.Request(
+            url=sizes_url,
+            callback=self.parse_item_sizes,
+            meta={"proxy": "http://37.252.7.112:3128",
+                  "item": item},
+        )
+
+
+    def parse_item_sizes(self, response):
+        item = response.meta['item']
+        print(item['id'])
+        product_data = json.loads(response.text)
+        sizes_data = (product_data['variation_list'])
+        sizes = [size['size'] for size in sizes_data]
+        print(sizes)
+        #item['availability']
         
-        self.item_count += 1
+        self.item_count *= 1
 
         if self.item_count > 20:
             raise CloseSpider('item_exceeded')
-        yield 
+        yield
