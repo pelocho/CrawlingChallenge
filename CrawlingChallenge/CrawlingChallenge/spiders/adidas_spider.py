@@ -66,11 +66,10 @@ class AdidasSpider(CrawlSpider):
 
     def parse_item_sizes(self, response):
         item = response.meta['item']
-        print(item['id'])
         product_data = json.loads(response.text)
+
         sizes_data = (product_data['variation_list'])
-        sizes = [size['size'] for size in sizes_data]
-        print(sizes)
+        item['sizes'] = [size['size'] for size in sizes_data]
         #item['availability']
         
         self.item_count *= 1
