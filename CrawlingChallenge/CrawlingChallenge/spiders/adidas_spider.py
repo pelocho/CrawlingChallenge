@@ -59,8 +59,7 @@ class AdidasSpider(CrawlSpider):
         yield scrapy.Request(
             url=sizes_url,
             callback=self.parse_item_sizes,
-            meta={"proxy": "http://37.252.7.112:3128",
-                  "item": item},
+            meta={"item": item},
         )
 
 
