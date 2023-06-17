@@ -51,10 +51,9 @@ class AdidasSpider(CrawlSpider):
         item['images_urls'] = images_url
         item['category_path'] = " > ".join(response.xpath('//div[1]/div[2]/ol/li[@typeof="ListItem"]/a/span/text()').getall())
         item['current_price'] = response.xpath('//div[@class="product-price___2Mip5 gl-vspace"]/div[1]/div[1]/div[1]/div[2]/text()').get() or original_price
-        print(item['current_price'])
         item['colors'] = colors_list_formated or unique_color
 
-        sizes_url = 'https://www.adidas.es/api/products/' + item['id']
+        sizes_url = 'https://www.adidas.es/api/products/' + item['id'] + '/availability'
 
         yield scrapy.Request(
             url=sizes_url,
@@ -69,7 +68,7 @@ class AdidasSpider(CrawlSpider):
 
         sizes_data = (product_data['variation_list'])
         item['sizes'] = [size['size'] for size in sizes_data]
-        #item['availability']
+        item['availability'] = [size['size'] for size in sizes_data if size['availability_status']=='IN_STOCK']
         
         self.item_count *= 1
 
