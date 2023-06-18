@@ -4,12 +4,12 @@ import json
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from CrawlingChallenge.items import ProductItem
-from scrapy.exceptions import CloseSpider
+#from scrapy.exceptions import CloseSpider
 
 class AdidasSpider(CrawlSpider):
     name = 'adidas-spider'
     # Added for testing on local with no huge amounts of data
-    item_count = 0
+    #item_count = 0
 
     allowed_domains = ['www.adidas.es']
     start_urls = ['https://www.adidas.es/hombre?grid=true',
@@ -72,8 +72,7 @@ class AdidasSpider(CrawlSpider):
         item['sizes'] = [size['size'] for size in sizes_data]
         item['availability'] = [size['size'] for size in sizes_data if size['availability_status']=='IN_STOCK']
         
-        self.item_count *= 1
-
-        if self.item_count > 20:
-            raise CloseSpider('item_exceeded')
+        #self.item_count *= 1
+        #if self.item_count > 20:
+        #    raise CloseSpider('item_exceeded')
         yield item
