@@ -37,7 +37,7 @@ class AdidasSpider(CrawlSpider):
 
         # In case there are more than one color we get 'Color del articulo: [color]' so I decided to format it and just show the color
         color_list = response.xpath('//div[@class="color-chooser-grid___1ZBx_"]/a/img/@alt').getall()
-        colors_list_formated = [color.replace('Color del artículo: ', '')for color in color_list]
+        colors_list_formated = [color.replace('Color del artículo: ', '')for color in color_list if color.startswith('Color del artículo: ')]
         # Else
         unique_color = response.xpath('//div[@data-auto-id="color-label"]/text()').get()
 
