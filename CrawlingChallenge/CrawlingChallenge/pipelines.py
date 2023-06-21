@@ -16,8 +16,10 @@ from CrawlingAPI.models import Product, Image, Color, Size
 
 
 class CrawlingchallengePipeline:
+    #Everytime a product is scraped from the page we're gonna get here the object and save it into database
     def process_item(self, item, spider):
-        product, created_bool = Product.objects.get_or_create(id=item['id'],
+        #In here we're gonna create the object with simple atributes and save it into db
+        product, _ = Product.objects.get_or_create(id=item['id'],
                                       title=item['title'],
                                       brand=item['brand'],
                                       description=item['description'],
@@ -25,22 +27,27 @@ class CrawlingchallengePipeline:
                                       original_price=item['original_price'],
                                       category_path=item['category_path'])
 
+        self.save_fks(item, product)
+
+        return item
+
+
+    def save_fks(self, item, product):
+        #Here we're gonna add to the object in the db the foreign keys needed for saving lists
         for available in item['availability']:
-            availability, created_bool = Size.objects.get_or_create(size=available,
-                                                                     availability=True)
+            availability, _ = Size.objects.get_or_create(size=available,
+                                                         availability=True)
             product.availability.add(availability)
 
         for image_data in item['images_urls']:
-            image, created_bool = Image.objects.get_or_create(url=image_data)
+            image, _ = Image.objects.get_or_create(url=image_data)
             product.images_url.add(image)
 
         for color_data in item['colors']:
-            color, created_bool = Color.objects.get_or_create(name=color_data)
+            color, _ = Color.objects.get_or_create(name=color_data)
             product.colors.add(color)
         
         for size_data in item['sizes']:
-            size, created_bool = Size.objects.get_or_create(size=size_data,
-                                                            availability=False)
+            size, _ = Size.objects.get_or_create(size=size_data,
+                                                 availability=False)
             product.sizes.add(size)
-
-        return item

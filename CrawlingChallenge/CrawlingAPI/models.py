@@ -20,6 +20,9 @@ class Image(models.Model):
         return self.url
 
 class Product(models.Model):
+    #For saving lists into some fields I decided to create a many-to-many relationship
+    #that way we can save some sizes (for example) in sizes table and link it to this product
+    #making easy the way to retrieve all the stored data about the product
     id = models.CharField(max_length=10, primary_key=True)
     title = models.CharField(max_length=25)
     brand = models.CharField(max_length=25)
